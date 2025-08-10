@@ -13,5 +13,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
     database: 'second-brain',
     entities: [Account, Session, User, Verification],
     synchronize: true,
-    timezone: 'America/Mexico_City',
+    timezone: '-06:00',
 };

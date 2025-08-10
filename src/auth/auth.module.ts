@@ -1,12 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeOrmConfig } from 'src/database/database.config';
+import { AuthModule as BetterAuthModule } from '@thallesp/nestjs-better-auth';
+import { auth } from './auth';
 
 @Module({
-    controllers: [AuthController],
-    imports: [TypeOrmModule.forRoot(typeOrmConfig)],
-    providers: [AuthService],
+    imports: [BetterAuthModule.forRoot(auth)],
 })
 export class AuthModule {}
