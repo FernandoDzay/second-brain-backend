@@ -8,6 +8,8 @@ import {
 } from 'typeorm';
 import { Session } from './session.entity';
 import { Account } from './account.entity';
+import { Payment } from 'src/payments/entities/payment.entity';
+import { Tag } from 'src/tags/entities/tag.entity';
 
 @Entity('user')
 export class User {
@@ -33,8 +35,14 @@ export class User {
     updatedAt: Date;
 
     @OneToMany(() => Session, (session) => session.user)
-    sessions: Awaited<Session[]>;
+    sessions: Session[];
 
     @OneToMany(() => Account, (account) => account.user)
-    accounts: Awaited<Account[]>;
+    accounts: Account[];
+
+    @OneToMany(() => Payment, (payment) => payment.user)
+    payments: Payment[];
+
+    @OneToMany(() => Tag, (tag) => tag.user)
+    tags: Payment[];
 }
