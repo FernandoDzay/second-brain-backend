@@ -19,7 +19,11 @@ export class PaymentsService {
         if (createPaymentDto.tagIds) {
             tags = await this.tagsRepository.find({ where: { id: In(createPaymentDto.tagIds) } });
         }
-        return this.paymentRepository.save({ ...createPaymentDto, tags, userId });
+
+        let amount: number;
+        if (createPaymentDto.amountType === 'income') amount = Math.abs(createPaymentDto.amount);
+        else amount = -Math.abs(createPaymentDto.amount);
+        return this.paymentRepository.save({ ...createPaymentDto, amount, tags, userId });
     }
 
     findAll(userId: string, filters?: FindAllPaymentsDto) {
@@ -52,17 +56,34 @@ export class PaymentsService {
                 createdAt,
                 tags: filters?.tags !== undefined ? { id: In(filters.tags) } : undefined,
             },
+            relations: { tags: true },
         });
     }
 
     findOne(userId: string, id: number) {
-        return this.paymentRepository.findOneBy({ id, userId });
+        return this.paymentRepository.findOne({ where: { id, userId }, relations: { tags: true } });
     }
 
     async update(userId: string, id: number, updatePaymentDto: UpdatePaymentDto) {
-        const payment = await this.paymentRepository.findOneBy({ id, userId });
+        const payment = await this.paymentRepository.findOne({
+            where: { id, userId },
+            relations: { tags: true },
+        });
         if (!payment) throw new NotFoundException();
-        return this.paymentRepository.save({ ...payment, ...updatePaymentDto });
+
+        let tags = payment.tags;
+        if (updatePaymentDto.tagIds) {
+            tags = await this.tagsRepository.find({ where: { id: In(updatePaymentDto.tagIds) } });
+        }
+
+        let amount = payment.amount;
+        if (updatePaymentDto.amountType && updatePaymentDto.amount) {
+            if (updatePaymentDto.amountType === 'income')
+                amount = Math.abs(updatePaymentDto.amount);
+            else amount = -Math.abs(updatePaymentDto.amount);
+        }
+
+        return this.paymentRepository.save({ ...payment, ...updatePaymentDto, amount, tags });
     }
 
     async remove(userId: string, id: number) {
