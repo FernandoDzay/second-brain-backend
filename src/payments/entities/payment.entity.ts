@@ -35,6 +35,9 @@ export class Payment {
     @Column({ type: 'boolean' })
     itIsLoan: boolean;
 
+    @Column({ type: 'date' })
+    date: string;
+
     @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
     createdAt: Date;
 

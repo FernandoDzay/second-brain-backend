@@ -8,6 +8,7 @@ export const CreatePaymentSchema = z.object({
         .refine((n) => n !== 0 && !Object.is(n, -0), { message: 'Debe ser distinto de 0' }),
     amountType: z.enum(['income', 'outgoing']),
     itIsLoan: z.coerce.boolean(),
+    date: z.iso.date(),
     tagIds: z.array(z.coerce.number()).optional(),
 });
 
