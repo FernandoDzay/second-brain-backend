@@ -54,4 +54,8 @@ export class Payment {
     @ManyToMany(() => Tag)
     @JoinTable()
     tags?: Tag[];
+
+    @ManyToMany(() => Payment)
+    @JoinTable()
+    payments?: Payment[];
 }

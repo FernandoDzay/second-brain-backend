@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, FindOperator, In, Like, MoreThanOrEqual, Repository } from 'typeorm';
 import { FindAllPaymentsDto } from './dto/find-all-payments.dto';
 import { Tag } from 'src/tags/entities/tag.entity';
+import { unrelatePaymentsDto } from './dto/unrelate-payments.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -61,7 +62,10 @@ export class PaymentsService {
     }
 
     findOne(userId: string, id: number) {
-        return this.paymentRepository.findOne({ where: { id, userId }, relations: { tags: true } });
+        return this.paymentRepository.findOne({
+            where: { id, userId },
+            relations: { tags: true, payments: true },
+        });
     }
 
     async update(userId: string, id: number, updatePaymentDto: UpdatePaymentDto) {
@@ -90,5 +94,61 @@ export class PaymentsService {
         const payment = await this.paymentRepository.findOneBy({ id, userId });
         if (!payment) throw new NotFoundException();
         return this.paymentRepository.delete(id);
+    }
+
+    async relatePayments(userId: string, paymentIds: number[]) {
+        const payments = await this.paymentRepository.find({
+            where: { id: In(paymentIds), userId },
+            relations: { payments: true },
+        });
+
+        // Map para acceso rápido a los IDs ya relacionados
+        const paymentsMap = new Map<number, Set<number>>();
+        for (const payment of payments) {
+            paymentsMap.set(payment.id, new Set(payment.payments?.map((p) => p.id) ?? []));
+        }
+
+        // Arreglo de pagos a actualizar
+        const updates: typeof payments = [];
+
+        for (const paymentI of payments) {
+            for (const paymentJ of payments) {
+                if (paymentI.id === paymentJ.id) continue;
+                if (paymentsMap.get(paymentI.id)!.has(paymentJ.id)) continue;
+
+                paymentI.payments!.push(paymentJ);
+                paymentsMap.get(paymentI.id)!.add(paymentJ.id);
+
+                if (!updates.includes(paymentI)) {
+                    updates.push(paymentI);
+                }
+            }
+        }
+
+        if (updates.length > 0) {
+            await this.paymentRepository.save(updates);
+        }
+    }
+
+    async unrelatePayments(userId: string, { paymentId_1, paymentId_2 }: unrelatePaymentsDto) {
+        const [payment1, payment2] = await Promise.all([
+            this.paymentRepository.findOne({
+                where: { id: paymentId_1, userId },
+                relations: { payments: true },
+            }),
+            this.paymentRepository.findOne({
+                where: { id: paymentId_2, userId },
+                relations: { payments: true },
+            }),
+        ]);
+
+        if (!payment1 || !payment2) {
+            throw new NotFoundException('Uno o ambos pagos no existen o no pertenecen al usuario');
+        }
+
+        payment1.payments = (payment1.payments ?? []).filter((p) => p.id !== paymentId_2);
+        payment2.payments = (payment2.payments ?? []).filter((p) => p.id !== paymentId_1);
+
+        await this.paymentRepository.save([payment1, payment2]);
     }
 }
