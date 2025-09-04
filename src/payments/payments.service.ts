@@ -57,6 +57,9 @@ export class PaymentsService {
                 createdAt,
                 tags: filters?.tags !== undefined ? { id: In(filters.tags) } : undefined,
             },
+            order: {
+                date: { direction: 'DESC' },
+            },
             relations: { tags: true },
         });
     }
