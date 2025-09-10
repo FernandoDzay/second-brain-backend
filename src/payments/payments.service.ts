@@ -7,6 +7,8 @@ import { Between, FindOperator, In, Like, MoreThanOrEqual, Repository } from 'ty
 import { FindAllPaymentsDto } from './dto/find-all-payments.dto';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { unrelatePaymentsDto } from './dto/unrelate-payments.dto';
+import { endOfMonth, startOfMonth } from 'date-fns';
+import { dateToString, round } from 'src/common/formatters';
 
 @Injectable()
 export class PaymentsService {
@@ -153,5 +155,43 @@ export class PaymentsService {
         payment2.payments = (payment2.payments ?? []).filter((p) => p.id !== paymentId_1);
 
         await this.paymentRepository.save([payment1, payment2]);
+    }
+
+    async getMonthPaymentsSummary(
+        userId: string,
+        date?: string,
+    ): Promise<{
+        income: number;
+        outgoing: number;
+    }> {
+        let startDate = startOfMonth(new Date());
+        let endDate = endOfMonth(new Date());
+        if (date) {
+            startDate = startOfMonth(new Date(date));
+            endDate = endOfMonth(new Date(date));
+        }
+
+        const payments = await this.paymentRepository.find({
+            where: {
+                userId,
+                date: Between(dateToString(startDate), dateToString(endDate)),
+            },
+            relations: {
+                payments: true,
+            },
+        });
+
+        let income = 0;
+        let outgoing = 0;
+
+        payments.forEach((payment) => {
+            if (payment.amount > 0) income += payment.amount;
+            else outgoing += payment.amount;
+        });
+
+        return {
+            income: Math.abs(round(income)),
+            outgoing: Math.abs(round(outgoing)),
+        };
     }
 }

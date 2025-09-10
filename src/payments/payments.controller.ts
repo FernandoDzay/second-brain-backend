@@ -16,6 +16,7 @@ import { AuthGuard, Session, UserSession } from '@thallesp/nestjs-better-auth';
 import { FindAllPaymentsDto } from './dto/find-all-payments.dto';
 import { RelatePaymentsDto } from './dto/relate-payments.dto';
 import { unrelatePaymentsDto } from './dto/unrelate-payments.dto';
+import { GetMonthPaymentsSummaryDto } from './dto/get-month-payments-summary.dto';
 
 @Controller('payments')
 @UseGuards(AuthGuard)
@@ -25,6 +26,14 @@ export class PaymentsController {
     @Post()
     create(@Body() createPaymentDto: CreatePaymentDto, @Session() session: UserSession) {
         return this.paymentsService.create(session.user.id, createPaymentDto);
+    }
+
+    @Get('get-month-payments-summary')
+    getMonthPaymentsSummary(
+        @Session() session: UserSession,
+        @Query() query: GetMonthPaymentsSummaryDto,
+    ) {
+        return this.paymentsService.getMonthPaymentsSummary(session.user.id, query.date);
     }
 
     @Get()
