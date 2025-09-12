@@ -30,24 +30,26 @@ export class PaymentsService {
     }
 
     findAll(userId: string, filters?: FindAllPaymentsDto) {
-        const description = filters?.description ? Like(filters.description) : undefined;
+        const description = filters?.description ? Like(`%${filters.description}%`) : undefined;
         let amount: FindOperator<number> | undefined = undefined;
-        let createdAt: FindOperator<Date> | undefined = undefined;
+        let date: FindOperator<string> | undefined = undefined;
 
         if (filters?.amountStart !== undefined && filters?.amountEnd !== undefined) {
-            amount = Between(filters.amountStart, filters.amountEnd);
+            if (filters.amountStart < 0 && filters.amountEnd < 0)
+                amount = Between(filters.amountEnd, filters.amountStart);
+            else amount = Between(filters.amountStart, filters.amountEnd);
         } else if (filters?.amountStart !== undefined) {
             amount = MoreThanOrEqual(filters.amountStart);
         } else if (filters?.amountEnd !== undefined) {
             amount = MoreThanOrEqual(filters.amountEnd);
         }
 
-        if (filters?.createdAtStart !== undefined && filters?.createdAtEnd !== undefined) {
-            createdAt = Between(filters.createdAtStart, filters.createdAtEnd);
-        } else if (filters?.createdAtStart !== undefined) {
-            createdAt = MoreThanOrEqual(filters.createdAtStart);
-        } else if (filters?.createdAtEnd !== undefined) {
-            createdAt = MoreThanOrEqual(filters.createdAtEnd);
+        if (filters?.dateStart !== undefined && filters?.dateEnd !== undefined) {
+            date = Between(filters.dateStart, filters.dateEnd);
+        } else if (filters?.dateStart !== undefined) {
+            date = MoreThanOrEqual(filters.dateStart);
+        } else if (filters?.dateEnd !== undefined) {
+            date = MoreThanOrEqual(filters.dateEnd);
         }
 
         return this.paymentRepository.find({
@@ -56,7 +58,7 @@ export class PaymentsService {
                 description,
                 amount,
                 itIsLoan: filters?.itIsLoan,
-                createdAt,
+                date,
                 tags: filters?.tags !== undefined ? { id: In(filters.tags) } : undefined,
             },
             order: {

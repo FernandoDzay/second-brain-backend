@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { zodAppBoolean } from 'src/common/zod-helpers';
 import { z } from 'zod';
 
 export const FindAllPaymentsSchema = z
@@ -6,9 +7,9 @@ export const FindAllPaymentsSchema = z
         description: z.coerce.string(),
         amountStart: z.coerce.number(),
         amountEnd: z.coerce.number(),
-        itIsLoan: z.coerce.boolean(),
-        createdAtStart: z.coerce.date(),
-        createdAtEnd: z.coerce.date(),
+        itIsLoan: zodAppBoolean,
+        dateStart: z.iso.date(),
+        dateEnd: z.iso.date(),
         tags: z.array(z.coerce.number()),
     })
     .partial();
