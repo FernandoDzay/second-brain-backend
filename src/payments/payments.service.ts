@@ -33,6 +33,7 @@ export class PaymentsService {
         const description = filters?.description ? Like(`%${filters.description}%`) : undefined;
         let amount: FindOperator<number> | undefined = undefined;
         let date: FindOperator<string> | undefined = undefined;
+        let tags: number[] | undefined = undefined;
 
         if (filters?.amountStart !== undefined && filters?.amountEnd !== undefined) {
             if (filters.amountStart < 0 && filters.amountEnd < 0)
@@ -52,6 +53,11 @@ export class PaymentsService {
             date = MoreThanOrEqual(filters.dateEnd);
         }
 
+        if (filters?.tags) {
+            if (typeof filters.tags === 'number') tags = [filters.tags];
+            else tags = filters.tags;
+        }
+
         return this.paymentRepository.find({
             where: {
                 userId,
@@ -59,7 +65,7 @@ export class PaymentsService {
                 amount,
                 itIsLoan: filters?.itIsLoan,
                 date,
-                tags: filters?.tags !== undefined ? { id: In(filters.tags) } : undefined,
+                tags: tags ? { id: In(tags) } : undefined,
             },
             order: {
                 date: { direction: 'DESC' },

@@ -10,7 +10,7 @@ export const FindAllPaymentsSchema = z
         itIsLoan: zodAppBoolean,
         dateStart: z.iso.date(),
         dateEnd: z.iso.date(),
-        tags: z.array(z.coerce.number()),
+        tags: z.array(z.coerce.number()).or(z.coerce.number()),
     })
     .partial();
 
