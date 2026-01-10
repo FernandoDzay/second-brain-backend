@@ -3,7 +3,7 @@ services:
 
   node-application:
     build: .
-    image: second-brain-backend
+    image: fernandodzay/second-brain-backend
     container_name: second-brain-backend
     ports:
       - "3013:3000"

@@ -27,5 +27,5 @@ jobs:
                       sudo git pull
                       docker container stop second-brain-backend
                       docker container rm second-brain-backend
-                      docker image rm second-brain-backend
-                      docker compose up -d
+                      docker pull fernandodzay/second-brain-backend
+                      docker run -d --name second-brain-backend -p 3013:3000 fernandodzay/second-brain-backend
