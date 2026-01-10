@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { validate } from './env-validator';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
         CommandsModule,
         PaymentsModule,
         TagsModule,
+        TasksModule,
         ConfigModule.forRoot({ isGlobal: true, validate }),
         ThrottlerModule.forRoot({
             throttlers: [

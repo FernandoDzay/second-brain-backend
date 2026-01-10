@@ -8,6 +8,7 @@ import { Payment } from 'src/payments/entities/payment.entity';
 import { Tag } from 'src/tags/entities/tag.entity';
 import { ConfigService } from '@nestjs/config';
 import { EnvType } from 'src/env-validator';
+import { Task } from 'src/tasks/entities/task.entity';
 
 @Module({
     imports: [
@@ -23,7 +24,7 @@ import { EnvType } from 'src/env-validator';
                 synchronize: true,
                 timezone: '-06:00',
                 autoLoadEntities: true,
-                entities: [Account, Session, User, Verification, Payment, Tag],
+                entities: [Account, Session, User, Verification, Payment, Tag, Task],
             }),
         }),
     ],
