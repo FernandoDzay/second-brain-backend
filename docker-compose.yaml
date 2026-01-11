@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   node-application:
-    build: .
+    # build: .
     image: fernandodzay/second-brain-backend
     container_name: second-brain-backend
     ports:
